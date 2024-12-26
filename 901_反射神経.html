@@ -1,0 +1,246 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+反射神経
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+
+
+
+/*  */
+.PushButton1{
+	border-radius:50%;
+	line-height:200px;
+	width:200px;
+	height:200px;
+//	padding:0;
+//	-webkit-box-shadow:0 5px #e6d900;
+//	box-shadow;0 5px 0 #e6d900;
+
+
+//	text-align:center;
+//	font-size:300%; //
+//	background-color : lime;
+}
+
+.PushButton2{
+//	border-radius:50%;
+	line-height:200px;
+	width:200px;
+	height:200px;
+	background-color:lime;
+//	padding:0;
+//	-webkit-box-shadow:0 5px #e6d900;
+//	box-shadow;0 5px 0 #e6d900;
+
+
+//	text-align:center;
+//	font-size:300%; //
+//	background-color : lime;
+}
+
+-->
+
+
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+
+// 出題中の問題
+var CurrentDisplayData = "";
+
+
+var StartTime = 0;
+
+// 測定回数
+//var COUNT_LEN = 3;
+var curCount = 0;
+
+var History = new Array();
+
+
+var LogCount = 0;
+
+// ログの代用
+function MyLogger(buff)
+{
+	if(window.document.NumInput.LOG_ABLED.checked){
+		// ログ有効
+		var tmp = document.getElementById('MyLog').innerHTML + "<br>" + buff;
+		document.getElementById('MyLog').innerHTML = tmp;
+		LogCount++;
+
+		if(0 == LogCount % window.document.NumInput.LogConut.value){
+			alert("Log Pause!!");
+			LogCount = 0;
+		}
+	}
+}
+
+
+// ランダムな番号取得
+function getRandamNumber(from, to)
+{
+	var minV = 0;
+	var maxV = 0;
+
+	minV = Math.ceil(from);
+	maxV = Math.floor(to);
+
+	var ret = Math.floor(Math.random() * (maxV - minV) + minV); // 候補の位置
+
+	return ret; // 候補の位置
+}
+
+// ボタンが押されるのを待っている
+var IsButtonWate = true;
+
+
+
+// 問題の表示
+//  s: ミリ秒
+function  PushNow(s)
+{
+//alert("PushNow:" + 1);
+	if(!IsButtonWate && (0 <= StartTime)){
+		// ボタン待ちではない、かつ、スタート時刻設定済み
+		document.getElementById('provlemDisplay').innerHTML 
+			= "<font color='red'>×</font>" + document.getElementById('provlemDisplay').innerHTML;
+		return;
+	}
+
+	if(0 < StartTime){
+		// スタート時刻設定済み
+		// １回ごとの測定
+		Timer = new Date();
+		now = Timer.getTime();
+		
+		var diff = now - StartTime;
+		History[curCount] = diff;
+		curCount++;
+
+		window.document.NumInput.PushButton3.style.backgroundColor = "lime"; 
+		window.document.NumInput.PushButton3.value = ""; 
+
+		StartTime = 0;
+	//	retrun;
+	}
+
+
+
+	if(window.document.NumInput.TraialConut.value == curCount){
+		// 全測定完了
+//	alert(History);
+		
+		var i = 0;
+		var wk = 0;
+
+		for(i = 0; i < window.document.NumInput.TraialConut.value; i++){
+			wk = wk + History[i];
+		}
+//alert(wk);
+		wk = wk / window.document.NumInput.TraialConut.value;
+
+		// 少数１桁切捨て３
+		wk =  Math.floor(wk * 10);
+		wk =  wk/10;
+
+		alert("平均:" + wk + "ミリ秒");
+
+
+
+		window.document.NumInput.PushButton3.value = "開始！"; 
+
+		StartTime = 0;
+		curCount = 0;
+		IsButtonWate = true;
+
+		document.getElementById('provlemDisplay').innerHTML = "";
+		return;
+	}
+	
+
+	function event(){
+		// このイベントは、ボタン待ちで状態の設定。
+
+		// １回ごとの完了
+		window.document.NumInput.PushButton3.value = "Push!!"; 
+		window.document.NumInput.PushButton3.style.backgroundColor = "RED"; 
+	
+		// 計測開始
+		Timer = new Date();
+		StartTime = Timer.getTime();
+
+		IsButtonWate = true;
+
+		clearInterval(timer1);	// 次回、ボタンを押してもらうためのイベント
+	}
+
+	window.document.NumInput.PushButton3.value = ""; 
+	IsButtonWate = false;
+
+	// 次回までの間隔
+	var t = getRandamNumber(2, 9);
+	timer1 = setInterval(event, 1000 * t);
+
+}
+
+
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white">
+<H1 class="ST_COLOR ">反射神経</H1>
+
+
+<P align="left">
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+
+　　<!-- ←余白用に全角空白あり！ -->
+検査の回数：
+<INPUT TYPE="number" NAME="TraialConut" MIN="1" VALUE=3 size="3" class="TextRight">
+
+
+<HR>
+
+
+<P align="center">
+  <INPUT TYPE="button" NAME="PushButton3" VALUE="開始！" class="PushButton2" onClick="return PushNow(2000);">
+</P>
+
+
+
+
+<!-- 
+擬似ログ
+
+<hr>
+<INPUT TYPE="checkbox" NAME="LOG_ABLED" ID="LOG_ABLED" checked /> 
+<LABEL for="KANA_TYPE2">ログ出力</LABEL>
+
+回数：<INPUT TYPE="text" NAME="LogConut" VALUE=5 size=5 class="TextRight">
+<INPUT TYPE="button" NAME="Log" VALUE="ログクリア" onClick="document.getElementById('MyLog').innerHTML='';">
+<P id="MyLog">log</P>
+
+-->
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

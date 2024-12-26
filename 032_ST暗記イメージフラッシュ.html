@@ -1,0 +1,253 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+ST暗記画像フラッシュ
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+var ItemCount = 0;
+
+// セパレータは半角空白
+var SEPARATOR = " ";
+
+// 問題の要素
+var QuestionArr = new Array();
+
+// 問題の配列                         
+QuestionArr = new Array();
+
+// 表示した選択肢一覧
+var PrevAnswer="";
+
+// 画像ファイル格納フォルダ
+var IMAGE_ROOT ="Image/";
+
+var IMAGE_BLUNK_NAME = "空白.PNG";
+
+// 問題の表示
+function DispValues(){
+
+	var QCount = window.document.NumInput.QCount.value; // 表示選択肢の数
+
+	var timer1 = null;
+
+	// 一つ目
+//	window.document.NumInput.provlemDisplay.value = Items[QuestionArr[0]];
+	// 画像表示
+	window.document.NumInput.ImageDisplay.src = IMAGE_ROOT + Items[QuestionArr[0]] + ".PNG";
+	// ２つ目以降
+	var k = 1;
+	function event(){
+
+		if(k < QCount){
+			// 選択肢の表示
+		//	window.document.NumInput.provlemDisplay.value = Items[QuestionArr[k]];
+
+			window.document.NumInput.ImageDisplay.src = IMAGE_ROOT + Items[QuestionArr[k]] + ".PNG";
+		}else{
+		//	window.document.NumInput.provlemDisplay.value = "";
+			window.document.NumInput.ImageDisplay.src = IMAGE_ROOT + IMAGE_BLUNK_NAME;
+			clearInterval(timer1);
+		}
+		k++;
+	}
+
+	timer1 = setInterval(event, 1000*window.document.NumInput.DisplayTime.value);
+}
+
+// 問題表示
+function makeQ()
+{
+	// 全問題候補数
+	ItemCount = Items.length;
+
+	// 問題の数
+	var QCount = window.document.NumInput.QCount.value;
+        
+
+	if(ItemCount < QCount){
+		// 画像データより、表示する数が多い。
+		// 実際には大量の画像データを準備するはずなので、このよう事はない。
+		alert("画像は" + ItemCount + "しかありません。「問題の数」" + QCount + " より多くの画像を用意してください。");
+
+		return;
+	}
+
+	window.document.NumInput.ImageDisplay.src = IMAGE_ROOT + IMAGE_BLUNK_NAME;
+//alert(IMAGE_ROOT + IMAGE_BLUNK_NAME);
+
+
+	// レポート欄クリア
+//	window.document.NumInput.Report.value = "";
+	document.getElementById('ReportArea').innerHTML = "";
+
+	var i = 0;
+
+	var minV = 0;
+	var maxV = 0;
+
+	while(i < QCount){
+
+		minV = Math.ceil(0);
+		maxV = Math.floor(ItemCount);
+
+		tmp = Math.floor(Math.random() * (maxV - minV) + minV); // 候補
+
+		var j = 0;
+		var find = true;
+
+		for(j=0; j < QuestionArr.length; j++){
+
+			if(tmp ==  QuestionArr[j]){
+				// 既にあるので別のランダム値を探す。
+				find = false;
+				break;
+			}
+		}
+
+		// 初めて見付かったら問題として表示する
+		if(find){
+			// 発見
+			QuestionArr[i] = tmp;
+			i++;
+		}
+// alert("i:" + i + "   tmp:" + tmp + "  len:" + QuestionArr.length);
+
+	}
+	
+	// 表示
+	DispValues(QuestionArr);
+
+	// 問題欄制御
+	window.document.NumInput.provlemBtn.disabled = true;
+}
+
+function checkAnswer()
+{
+
+	// 入力欄(回答一覧)
+	var Ans = window.document.NumInput.provlemDisplay.value;
+
+	// 回答結果の文字列  ○ × つき
+	var resultStr = "";
+
+	// 問題の配列
+
+	// 問題の数
+	var qCount = window.document.NumInput.QCount.value;
+
+	// 回答を配列に分離
+	//  全半が混合しいる場合に備え、一旦、空白は半角にしてから分離
+	var Ans2 = Ans.replace(/　/g, SEPARATOR);
+	var answersArr = Ans2.split(SEPARATOR);
+
+	var k = 0;
+	var j = 0;
+	for(k=0; k < qCount; k++){
+		// k 番目の正しい選択肢の確認
+
+//alert(Ans + " ----- " + Items[QuestionArr[k]]);
+
+		var okFlag = false;
+		for(j=0; j < answersArr.length; j++){
+			// 回答配列 の j 番目
+			if(answersArr[j] == Items[QuestionArr[k]]){
+				// 正解
+				okFlag = true;
+				break;
+			}
+		}
+
+	//	画像の場合はチェックはしないので、すべて ○ と表示する。
+
+	//	if(okFlag){
+			resultStr = resultStr + "<font color='blue' size=+3><b>○</b></font>　";
+	//	}else{
+	//		resultStr = resultStr + "<font color='red' size=+3><b>×</b></font>　";
+	//	}
+
+
+		resultStr = resultStr + Items[QuestionArr[k]] + "　";
+
+	}
+	document.getElementById('ReportArea').innerHTML = resultStr;
+
+	// 問題欄制御(入力許可)
+	window.document.NumInput.provlemBtn.disabled = false;
+}
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white">
+<script src="Data/ST暗記イメージフラッシュ.js"></script>
+<H1 class="ST_COLOR ">暗記イメージフラッシュ</H1>
+
+<P align="left">
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+問題の数：
+<SELECT NAME="QCount" size=1>
+<OPTION value=1>1
+<OPTION value=2>2
+<OPTION value=3>3
+<OPTION value=4 selected>4
+<OPTION value=5>5
+<OPTION value=6>6
+<OPTION value=7>7
+<OPTION value=8>8
+<OPTION value=9>9
+<OPTION value=10>10
+<OPTION value=11>11
+<OPTION value=12>12
+<OPTION value=13>13
+<OPTION value=14>14
+<OPTION value=15>15
+<OPTION value=16>16
+</SELECT>
+
+　　<!-- ←余白用に全角空白あり！ -->
+表示秒数：
+<INPUT TYPE="number" NAME="DisplayTime" STEP="0.1" MIN="0.1" VALUE="0.5" size=5 class="TextRight">
+
+
+<HR>
+
+<INPUT TYPE="button" NAME="provlemBtn" VALUE="出題" class="Question" onClick="return makeQ();">
+
+
+<P align="left">
+<img id="ImageDisplay" src="Image/空白.PNG">
+<INPUT TYPE="hidden" NAME="provlemDisplay" VALUE="" size=32 class="Question">
+</p>
+
+<INPUT TYPE="button" VALUE="回答" class="CheckTest" onClick="return checkAnswer();">
+
+<TABLE align="left">
+<TR>
+<TD>
+<P id="ReportArea"></P>
+</TD>
+</TR>
+</TABLE>
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

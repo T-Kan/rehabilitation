@@ -1,0 +1,115 @@
+﻿
+.ST_COLOR {
+	background-color:blue;
+	color:white;
+}
+
+.OT_COLOR {
+	background-color:green;
+	color:white;
+}
+
+.PT_COLOR {
+	background-color:red;
+	color:white;
+}
+
+
+/* 数字用右詰めテキスト */
+.TextRight {
+	text-align:right;
+}
+
+/* 中央揃えテキスト */
+.TextCenter {
+	text-align:center;
+}
+
+
+/* 問題の文字列表示 */
+.ProvlemText {
+	text-align:center;
+	font-size:200%;
+}
+
+
+
+/* 縦書き表示表示 */
+.VerticalText {
+	writing-mode:vertical-rl;
+}
+
+
+
+/* 白地のプッシュボタン */
+.PushButton{
+	text-align:center;
+//	font-size:20px; //
+	border : 0;
+	background-color : #FFFFFF;
+}
+
+
+/*  出題ボタン*/
+.Question {
+	text-align:center;
+/*	vertical-align:middle; */
+/*	font-size:24px;      */
+	background-color:lime;
+}
+
+
+
+/*  確認用ボタン*/
+.CheckTest {
+	text-align:center;
+/*	font-size:24px;      */
+	background-color:red;
+}
+
+/*  出題ボタン*/
+.Clear {
+	text-align:center;
+/*	font-size:24px;      */
+	background-color:yellow;
+}
+
+/*  出題ボタン*/
+.Redraw {
+	text-align:center;
+/*	font-size:24px;      */
+	background-color:yellow;
+}
+
+
+
+/*  */
+/*  */
+
+/*  
+.Question {
+	text-align:center;
+	font-size:24px;
+}
+
+
+
+.ContText {
+	text-align:right;
+}
+
+.CenterText {
+	text-align:center;
+}
+
+
+
+
+.Pushed{
+	text-align:center;
+	font-size:14px;
+}
+
+
+
+*/

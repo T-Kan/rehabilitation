@@ -1,0 +1,398 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+STランダム文字列フラッシュ
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+-->
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+
+// 出題中の問題
+var CurrentDisplayData = "";
+
+// ひらがな、カタカナ
+var HiraKanaMode = 0;
+var HIRA = 0;
+var KATA = 1;
+var LogCount = 0;
+
+// ログの代用
+function MyLogger(buff)
+{
+	if(window.document.NumInput.LOG_ABLED.checked){
+		// ログ有効
+		var tmp = document.getElementById('MyLog').innerHTML + "<br>" + buff;
+		document.getElementById('MyLog').innerHTML = tmp;
+		LogCount++;
+
+		if(0 == LogCount % window.document.NumInput.LogConut.value){
+			alert("Log Pause!!");
+			LogCount = 0;
+		}
+	}
+}
+
+
+
+
+// 文字消去
+function Eraser()
+{
+
+	var timer1 = null;
+	var k = 0;
+
+	function event(){
+
+		if(k < 0){
+			
+		}else{
+			document.getElementById('provlemDisplay').innerHTML = "";
+			clearInterval(timer1);
+			return;
+		}
+		k++;
+	}
+
+	timer1 = setInterval(event, 1000*window.document.NumInput.DisplayTime.value);
+
+}
+
+
+// 
+// type: 文字種類
+function checkKanaType(type)
+{
+
+	if(1 == type){
+		// 濁音、半濁音
+		return window.document.NumInput.KANA_TYPE1.checked;
+	}else if(2 == type){
+		// ゃゅょ
+		return ((window.document.NumInput.KANA_TYPE2.checked) && (window.document.NumInput.KANA_TYPE0.checked));
+	}else if(3 == type){
+		// 濁音 ゃゅょ
+		return ((window.document.NumInput.KANA_TYPE2.checked) && (window.document.NumInput.KANA_TYPE1.checked));
+	}else{
+		// 
+		return window.document.NumInput.KANA_TYPE0.checked;
+	}
+}
+
+
+// ランダムに一つ選ぶ
+// type: 文字種類
+function getKANA(type, pos)
+{
+	var ret = ""; // 文字
+	var len = 0;  // 選ぶ列の長さ 
+
+	// 元データの配列の長さ。ひらがなも、カタカナも数は同じなので、ひらがな で数える。
+	if(1 == type){
+		// 濁音、半濁音
+		len = HIRA_DAKU.length;
+	}else if(2 == type){
+		//  拗音
+		len = HIRA_xArray.length;
+	}else if(3 == type){
+		//  拗・濁音
+		len = HIRA_DAKUxArray.length;
+	}else{
+		// あいう
+		len = HIRA_USUAL.length;
+
+		if(1 == pos){
+			// 最初の文字の場合、配列末尾の　"んっ" の２文字は除外する
+			len = len - 2;
+		}
+	}
+
+	// ランダムな番号
+	var index = getRandamNumber(0, len);
+
+	// 追加していく文字。ひらがなも、カタカナで異なるので、配列を区別する。
+
+	if(1 == type){
+		// 濁音、半濁音
+		if(HIRA == HiraKanaMode){
+			ret = HIRA_DAKU.substr(index, 1);
+		}else{
+			ret = KATA_DAKU.substr(index, 1);
+		}
+
+	}else if(2 == type){
+		// 拗音
+		if(HIRA == HiraKanaMode){
+			ret = HIRA_xArray[index];
+		}else{
+			ret = KATA_xArray[index];
+		}
+	}else if(3 == type){
+		//  拗・濁音
+		if(HIRA == HiraKanaMode){
+			ret = HIRA_DAKUxArray[index];
+		}else{
+			ret = KATA_DAKUxArray[index];
+		}
+	}else{
+		// あいう
+		if(HIRA == HiraKanaMode){
+			ret = HIRA_USUAL.substr(index, 1);
+		}else{
+			ret = KATA_USUAL.substr(index, 1);
+		}
+	}
+
+	return ret;
+}
+
+
+// ランダムな番号取得
+function getRandamNumber(from, to)
+{
+	var minV = 0;
+	var maxV = 0;
+
+	minV = Math.ceil(from);
+	maxV = Math.floor(to);
+
+	var ret = Math.floor(Math.random() * (maxV - minV) + minV); // 候補の位置
+
+	return ret; // 候補の位置
+}
+
+// 問題表示
+function DispProblem(mode)
+{
+
+	if(!CheckBoxState()){
+		// 清音、濁音 の設置が不備
+		return false;
+	}
+
+	// ひらがな カタカナの設定
+	HiraKanaMode = getRadio();
+
+  if(0 == mode){
+
+	// 問題の文字列の長さ
+	var QCount = window.document.NumInput.QCount.value;
+        
+	CurrentDisplayData = "";
+
+	var i = 0;
+
+	var kanaType = getRandamNumber(0, 3);
+
+
+	// 文字列を作って表示する
+	while(i < QCount){
+
+
+		if(false == checkKanaType(kanaType)){
+			// この字種は表示しない文字なので、次に進む
+			kanaType = (kanaType + 1) % 4;
+			continue;
+		}
+
+		if((2 == kanaType) || (3 == kanaType)){
+			// 小さい文字の場合
+			if((i+2) > QCount){
+				// 小さい文字なので、２文字追加で超える場合は、次で再開
+				kanaType = (kanaType + 1) % 4;
+				continue;
+			}
+
+			i = i + 2; // ２文字分追加
+		}else{
+			// 一文字
+			i = i + 1; // 1文字分追加
+		}
+	
+		CurrentDisplayData = CurrentDisplayData + getKANA(kanaType);
+
+		kanaType = (kanaType + 1) % 4;
+	}
+
+  }	 
+
+	// 問題の表示
+	document.getElementById('provlemDisplay').innerHTML = CurrentDisplayData
+
+	// ズーム
+	var div = document.getElementById('provlemDisplay');
+	div.style.fontSize = window.document.NumInput.ZOOM.value;
+
+	// 指定時間経過で消す
+
+	if(0 < window.document.NumInput.DisplayTime.value){
+	
+		Eraser();
+	}
+
+}
+
+// 表示中の回答を再表示する
+function AnswerDisplay()
+{
+	alert(CurrentDisplayData);
+
+}
+
+// 文字の設定チェックと訂正
+function CheckBoxState()
+{
+	if(window.document.NumInput.KANA_TYPE0.checked || window.document.NumInput.KANA_TYPE1.checked){
+		return true;
+	}else{
+		alert("「普通」か「半・濁音」の、いずれか必要です。「普通」を選択します。");
+		window.document.NumInput.KANA_TYPE0.checked = true;
+		return false;
+	}
+}
+
+
+// ズーム
+function ZoomChange(diff)
+{
+
+	var wk = Number(window.document.NumInput.ZOOM.value);
+	wk = wk + diff;
+
+	if(wk < 0){
+		return;
+	}
+	window.document.NumInput.ZOOM.value = wk;	
+
+}
+
+// 横・縦書き指定
+function ChengeVH()
+{
+	if(!window.document.NumInput.V_WRITING.checked){
+		// 横書きに変更
+		document.getElementById('provlemDisplay').classList.remove("VerticalText");
+	}else{
+		// 縦書きに変更
+ 		document.getElementById('provlemDisplay').classList.add("VerticalText");
+	}
+}
+
+// ラジオボタンの値
+function getRadio()
+{
+	for(var i = 0;i < 2; i++){
+		if(window.document.NumInput.KanaType.item(i).checked){
+			return window.document.NumInput.KanaType.item(i).value;
+		}
+	}
+}
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white" onload="SetCharString();">
+<script src="Data/STランダム文字列.js"></script>
+<H1 class="ST_COLOR ">ランダム仮名文字フラッシュ</H1>
+
+
+<P align="left">
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+文字数：
+<SELECT NAME="QCount" size=1>
+<OPTION value=1>1
+<OPTION value=2>2
+<OPTION value=3>3
+<OPTION value=4 selected>4
+<OPTION value=5>5
+<OPTION value=6>6
+<OPTION value=7>7
+<OPTION value=8>8
+<OPTION value=9>9
+<OPTION value=10>10
+<OPTION value=11>11
+<OPTION value=12>12
+<OPTION value=13>13
+<OPTION value=14>14
+<OPTION value=15>15
+<OPTION value=16>16
+</SELECT>
+
+　　<!-- ←余白用に全角空白あり！ -->
+表示秒数：
+<INPUT TYPE="number" NAME="DisplayTime" STEP="0.1" MIN="0.1"VALUE="1.5" size=5 class="TextRight">
+(-1 の場合、ずっと表示)
+
+　　<!-- ←余白用に全角空白あり！ -->
+	<INPUT TYPE="checkbox" NAME="V_WRITING" ID="V_WRITING" onClick="return ChengeVH();"/> 
+	<LABEL for="KANA_TYPE0">縦書</LABEL>
+
+
+<br>
+仮名文字：
+<INPUT TYPE="radio" NAME="KanaType" ID="hira" VALUE=0 checked><label for "hira">ひらがな</label>
+<INPUT TYPE="radio" NAME="KanaType" ID="kata" VALUE=1><label for "rana">カタカナ</label>
+<br>
+
+　　<!-- ←余白用に全角空白あり！ -->
+	<INPUT TYPE="checkbox" NAME="KANA_TYPE" ID="KANA_TYPE0" checked onClick="return ButonState(0);"/> 
+	<LABEL for="KANA_TYPE0">清音</LABEL>
+　　<!-- ←余白用に全角空白あり！ -->
+
+	<INPUT TYPE="checkbox" NAME="KANA_TYPE" ID="KANA_TYPE1" checked /> 
+	<LABEL for="KANA_TYPE1">半・濁音</LABEL>
+　　<!-- ←余白用に全角空白あり！ -->
+
+	<INPUT TYPE="checkbox" NAME="KANA_TYPE" ID="KANA_TYPE2" checked /> 
+	<LABEL for="KANA_TYPE2">拗音</LABEL>
+
+<P align="right">
+	ズーム：<INPUT TYPE="number" NAME="ZOOM" MIN="1" VALUE=100 size=5 class="TextRight">
+	<INPUT TYPE="button" NAME="ZoomOut" VALUE="－" class="Question" onClick="return ZoomChange(-10);">
+	<INPUT TYPE="button" NAME="ZoomIn" VALUE="＋" class="Question" onClick="return ZoomChange(10);">
+</P>
+
+<HR>
+
+<INPUT TYPE="button" NAME="provlemBtn" VALUE="出題" class="Question" onClick="return DispProblem(0);">
+<INPUT TYPE="button" NAME="replayBtn" VALUE="再表示" class="Redraw" onClick="return DispProblem(1);">
+
+
+
+
+<!-- ランダム文字列表示 -->
+<TABLE align="center">
+  <TR>
+    <TD>
+      <font size=+5>
+        <P id="provlemDisplay"></P>
+      </font>
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+
+
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

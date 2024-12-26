@@ -1,0 +1,273 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+STランダム文字列
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+
+
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+
+// 出題中の問題
+var CurrentDisplayData = "";
+
+
+var CurItemArr = null;
+
+// 文章中の位置
+
+// ページの場所
+var CurPageIndex = 0;
+
+// 行の番号
+//var CurLine = 0;
+
+// 行内の表示場所
+var CurPos = 0;
+
+// var CurItemArr = new Array();
+
+var CurBuff = "カラオケの/画面のように、/文字列を/部分的に/表示してみる。";
+
+
+
+
+
+var LogCount = 0;
+
+// ログの代用
+function MyLogger(buff)
+{
+	if(window.document.NumInput.LOG_ABLED.checked){
+		// ログ有効
+		var tmp = document.getElementById('MyLog').innerHTML + "<br>" + buff;
+		document.getElementById('MyLog').innerHTML = tmp;
+		LogCount++;
+
+		if(0 == LogCount % window.document.NumInput.LogConut.value){
+			alert("Log Pause!!");
+			LogCount = 0;
+		}
+	}
+}
+
+
+function SetItem(index)
+{
+	// 文章を、/ ごとに配列に分割する。	
+	CurItemArr = CurBuff.split('/');
+
+}
+
+// 一行の表示
+function UpdateLine(pos)
+{
+	var i = 0;
+	var buff = "";
+
+
+	for(i = 0; i < CurLineArr.length; i++){
+
+		if(i == pos){
+			// 表示を強調
+			buff = buff + "<font color='red'>" + CurLineArr[i] + "</font>";
+
+		}else{
+			buff = buff + CurLineArr[i];
+		}
+	}
+
+	// ズーム
+	var div = document.getElementById('provlemDisplay');
+	div.style.fontSize = window.document.NumInput.ZOOM.value;
+
+	document.getElementById('provlemDisplay').innerHTML = buff;
+}
+
+
+var CurLineIndex = 0;
+var CurLine = "";
+var CurLineArr = null;
+var CurPos = 0;
+
+
+// 問題表示
+function DispProblem(direction)
+{
+//alert(direction);
+
+
+	if(null == CurLineArr){
+alert(0);
+		// 最初
+		var line = Word001[0];
+alert(line);
+		CurLineArr = line.split('/');
+alert("3 " + Word001.length);
+		window.document.NumInput.ALL_COUNT.value = Word001.length; 
+alert(5);
+
+	//	document.getElementById('ALL_COUNT').value = Word001.length; 
+				 
+	}else if(0 != direction){
+
+		CurPos = CurPos + direction; // 次の表示更新位置
+
+		if(CurPos >= CurLineArr.length){
+			// 次のページに更新
+		
+			CurLineIndex = CurLineIndex + direction;
+
+
+			if(CurLineIndex >= Word001.length){
+				// 行を超えるので、最初の行に戻す
+				CurLineIndex = 0;
+			}
+
+			CurPos = 0;
+			var line = Word001[CurLineIndex];
+			CurLineArr = line.split('/');
+
+		}else if(CurPos < 0){
+			// 戻しすぎ
+			CurLineIndex = CurLineIndex + direction;
+
+			if(CurLineIndex < 0 ){
+				// 戻りすぎなので、最後の行に戻す
+				CurLineIndex = Word001.length + direction;
+
+			}
+			var line = Word001[CurLineIndex];
+			CurLineArr = line.split('/');
+			CurPos = CurLineArr.length - 1;
+		}
+
+	}else if(0 == direction){
+		// 指定したページにジャンプ
+	//	var index = document.getElementById('Counter').value;
+		var index = window.document.NumInput.Counter.value;
+
+		if((index <= 0) || (Word001.length < index)){
+			// 範囲外
+			alert("「項番」の指定範囲を超えています。");
+			retrun;
+		}
+
+		CurLineIndex = index - 1; // 配列なので０オリジン
+		CurPos = 0;
+
+		var line = Word001[CurLineIndex];
+		CurLineArr = line.split('/');
+	}
+
+	if(0 != direction){
+		// 項番
+		window.document.NumInput.Counter.value = (1 + CurLineIndex); // １オリジン
+	}
+
+
+//alert("CurLineIndex:" + CurLineIndex + "    CurPos:" + CurPos);
+
+	UpdateLine(CurPos);
+}
+
+// 横・縦書き指定
+function ChengeVH()
+{
+	if(!window.document.NumInput.V_WRITING.checked){
+		// 横書きに変更
+		document.getElementById('provlemDisplay').classList.remove("VerticalText");
+	}else{
+		// 縦書きに変更
+ 		document.getElementById('provlemDisplay').classList.add("VerticalText");
+	}
+}
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white">
+<script src="data/STカラオケ.js"></script>
+<H1 class="ST_COLOR ">カラオケ</H1>
+
+
+<P align="left">
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+
+項番：
+<INPUT TYPE="number" NAME="Counter" VALUE=1 size=3 class="TextRight" MIN="0">
+<!-- / <SPAN id="ALL_COUNT"></SPAN> -->
+/ <INPUT TYPE="text" NAME="ALL_COUNT" VALUE=1 size=3 readonly class="TextRight">
+
+
+
+<SPAN id="ALL_COUNT"></SPAN>
+
+
+　<!-- ←余白用に全角空白あり！ -->
+<INPUT TYPE="button" NAME="Jump" VALUE="移動" class="Question" onClick="return DispProblem(0);">
+
+　　<!-- ←余白用に全角空白あり！ -->
+	<INPUT TYPE="checkbox" NAME="V_WRITING" ID="V_WRITING" onClick="return ChengeVH();"/> 
+	<LABEL for="KANA_TYPE0">縦書</LABEL>
+
+<P align="right">
+	ズーム：<INPUT TYPE="number" NAME="ZOOM" MIN="1" VALUE=30 size=5 class="TextRight">
+	<INPUT TYPE="button" NAME="ZoomOut" VALUE="－" class="Question" onClick="return ZoomChange(-10);">
+	<INPUT TYPE="button" NAME="ZoomIn" VALUE="＋" class="Question" onClick="return ZoomChange(10);">
+</P>
+<HR>
+
+<INPUT TYPE="button" NAME="BadckBtn" VALUE="＜前" class="Question" onClick="return DispProblem(-1);">
+<INPUT TYPE="button" NAME="ForwordBtn" VALUE="次＞" class="Question" onClick="return DispProblem(1);">
+
+<br><br>
+
+
+<!-- 一行の表示内容 -->
+<TABLE align="reft">
+  <TR>
+    <TD>
+        <P id="provlemDisplay"></P>
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+<!-- 
+
+擬似ログ
+
+<hr>
+<INPUT TYPE="checkbox" NAME="LOG_ABLED" ID="LOG_ABLED" checked /> 
+<LABEL for="KANA_TYPE2">ログ出力</LABEL>
+
+回数：<INPUT TYPE="text" NAME="LogConut" VALUE=25 size=5 class="TextRight">
+<INPUT TYPE="button" NAME="Log" VALUE="ログクリア" onClick="document.getElementById('MyLog').innerHTML='';">
+<P id="MyLog">log</P>
+
+-->
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

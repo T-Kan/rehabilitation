@@ -1,0 +1,217 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+20_ST音読単語フラッシュ
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+
+
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+// 表示項目のカテゴリ
+var CategoryItemsArr = null;
+
+var ItemCount = 0;
+
+
+// 問題の要素
+var QuestionArr = new Array();
+
+// 問題の表示
+function DispValues(){
+
+	var QCount = window.document.NumInput.QCount.value; // 表示選択肢の数
+
+	var timer1 = null;
+
+	// 一つ目
+	document.getElementById('provlemDisplay').innerHTML  = CategoryItemsArr[QuestionArr[0]];
+
+	// ２つ目以降
+	var k = 1;
+	function event(){
+
+		if(k < QCount){
+			// 選択肢の表示
+			document.getElementById('provlemDisplay').innerHTML  = CategoryItemsArr[QuestionArr[k]];
+		}else{
+			document.getElementById('provlemDisplay').innerHTML  = "";
+			clearInterval(timer1);
+			window.document.NumInput.answerBtn.disabled = false;
+		}
+		k++;
+	}
+
+	timer1 = setInterval(event, 1000*window.document.NumInput.DisplayTime.value);
+}
+
+// 問題表示
+function makeQ(isReplay)
+{
+
+    if(0 == isReplay){
+
+	// 全問題候補数
+	ItemCount = CategoryItemsArr.length;
+
+	// 問題の数
+	var QCount = window.document.NumInput.QCount.value;
+        
+	// 出題クリア
+	document.getElementById('provlemDisplay').innerHTML  = "";
+
+	var i = 0;
+
+	var minV = 0;
+	var maxV = 0;
+
+	while(i < QCount){
+
+		minV = Math.ceil(0);
+		maxV = Math.floor(ItemCount);
+
+		tmp = Math.floor(Math.random() * (maxV - minV) + minV); // 候補
+
+		var j = 0;
+
+		var find = true;
+
+		for(j=0; j < QuestionArr.length; j++){
+
+			if(tmp ==  QuestionArr[j]){
+				// 既にあるので別のランダム値を探す。
+				find = false;
+				break;
+			}
+		}
+
+		// 初めて見付かったら問題として表示する
+		if(find){
+			// 発見
+			QuestionArr[i] = tmp;
+			i++;
+		}
+// alert("i:" + i + "   tmp:" + tmp + "  len:" + QuestionArr.length);
+
+	}
+    }
+	// ズーム
+	var div = document.getElementById('provlemDisplay');
+	div.style.fontSize = window.document.NumInput.ZOOM.value;
+
+	// 表示
+	DispValues(QuestionArr);
+
+	// 問題欄制御
+//	window.document.NumInput.provlemBtn.disabled = true;
+}
+
+// カテゴリデータの配列の入れ替え
+function ChangeCatetory()
+{
+	var catName = window.document.NumInput.Category.value;
+	var wk = "CategoryItemsArr = " + window.document.NumInput.Category.value + ";";
+
+// alert(catName);
+	eval(wk);
+}
+
+// 横・縦書き指定
+function ChengeVH()
+{
+	if(!window.document.NumInput.V_WRITING.checked){
+		// 横書きに変更
+		document.getElementById('provlemDisplay').classList.remove("VerticalText");
+	}else{
+		// 縦書きに変更
+ 		document.getElementById('provlemDisplay').classList.add("VerticalText");
+	}
+}
+
+
+// ズーム
+function ZoomChange(diff)
+{
+	var wk = Number(window.document.NumInput.ZOOM.value);
+	wk = wk + diff;
+
+	if(wk < 0){
+		return;
+	}
+	window.document.NumInput.ZOOM.value = wk;	
+}
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white" onLoad="ChangeCatetory()">
+<H1 class="ST_COLOR ">音読単語フラッシュ</H1>
+<script src="Data/ST音読単語フラッシュ.js"></script>
+
+<P align="left">
+
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+
+カテゴリ：
+<SELECT NAME="Category" size=1 onChange="return ChangeCatetory();">
+<OPTION value='Items1' selected>高頻度
+<OPTION value='Items2'>低頻度
+</SELECT>
+
+
+
+<INPUT type="hidden"  NAME="QCount" VALUE=1>
+
+　　<!-- ←余白用に全角空白あり！ -->
+表示秒数：
+<INPUT TYPE="number" NAME="DisplayTime" STEP="0.1" MIN="0.1" VALUE="0.5" size=5 class="TextRight">
+　　<!-- ←余白用に全角空白あり！ -->
+
+　　<!-- ←余白用に全角空白あり！ -->
+	<INPUT TYPE="checkbox" NAME="V_WRITING" ID="V_WRITING" onClick="return ChengeVH();"/> 
+	<LABEL for="KANA_TYPE0">縦書</LABEL>
+
+
+<P align="right">
+ズーム：<INPUT TYPE="number" NAME="ZOOM" MIN="1" VALUE=100 size=5 class="TextRight">
+<INPUT TYPE="button" NAME="ZoomOut" VALUE="－" class="Question" onClick="return ZoomChange(-10);">
+<INPUT TYPE="button" NAME="ZoomIn" VALUE="＋" class="Question" onClick="return ZoomChange(10);">
+</P>
+
+<HR>
+
+<INPUT TYPE="button" NAME="provlemBtn" VALUE="出題" class="Question" onClick="return makeQ(0);">
+　<!-- ←余白用に全角空白あり！ -->
+<INPUT TYPE="button" NAME="answerBtn" VALUE="再表示" class="CheckTest" disabled onClick="return makeQ(1);">
+
+
+<!-- ランダム文字列表示 -->
+<TABLE align="center">
+  <TR>
+    <TD>
+        <P id="provlemDisplay"></P>
+    </TD>
+  </TR>
+</TABLE>
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

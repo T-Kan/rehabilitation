@@ -1,0 +1,306 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+033_音韻抽出配列課題
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+.Tile{
+	text-align:center;
+	font-family:monospace;
+	font-size:30px;
+
+//	border : 1px solid #0F0F0F;
+//	background-color : #FFFFFF;
+}
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+// 表示項目のカテゴリ
+var CategoryItemsArr = null;
+
+var ItemCount = 0;
+
+// 今の番号
+var CurIndex = 0;
+
+// 正解
+var Result = "";
+
+// 文字パネル
+var PANEL_WIDTH = 3;
+var PANEL_HEIGHT = 2;
+
+
+// セパレータは半角空白
+var SEPARATOR = " ";
+
+// 問題の要素
+var QuestionArr = new Array();
+
+// 問題の配列                         
+QuestionArr = new Array();
+
+// 表示した選択肢一覧
+var PrevAnswer="";
+
+// 画像ファイル格納フォルダ
+var IMAGE_ROOT ="Image/音韻抽出配列課題/";
+
+var IMAGE_BLUNK_NAME = "空白.PNG";
+
+// 問題の表示
+function DispValues(){
+
+}
+
+// ランダムな番号取得
+function getRandamNumber(from, to)
+{
+	var minV = 0;
+	var maxV = 0;
+
+	minV = Math.ceil(from);
+	maxV = Math.floor(to);
+
+	var ret = Math.floor(Math.random() * (maxV - minV) + minV); // 候補の位置
+
+	return ret; // 候補の位置
+}
+
+
+// 問題表示
+function DispProblem(direction)
+{
+	// 表示する問題の番号
+	CurIndex = CurIndex + direction;
+
+	var len = CategoryItemsArr.length;
+
+	// 循環
+	if(len <= CurIndex){
+		CurIndex = 0;
+	}else if(CurIndex < 0){
+		CurIndex = len - 1;
+	}
+
+	// 正解
+	Result = CategoryItemsArr[CurIndex];
+
+	// 画像表示
+	window.document.NumInput.ImageDisplay.src = IMAGE_ROOT + Result + ".PNG";
+
+	// 文字の候補 (正解はResult)
+
+	// 表示項目のカテゴリ
+	var wkArr = new Array();
+	var i = 0;
+
+	var dummyArea = HIRA_USUAL.length - 1;
+
+	var usedStr = ""; // 乱数部分の重複除外用
+	
+	// 一旦、先頭に回答を固める
+	for(i = 0; i < 6; i++){
+		if(i < Result.length){
+			// 正解部分
+			wkArr[i] = Result.substring(i, i+1);
+		}else{
+			// ランダム部分
+		//	var n = getRandamNumber(0, dummyArea);
+		//	var dummy = HIRA_USUAL.substring(n, n+1);
+
+			var dummy = "";
+			var k = 0;
+
+			for(k = 0; k < 10; k++){
+				// 正解の文字は、乱数部分の同じ文字は含めない。(10 チャレンジで重なるようならならあきらめる)
+				var n = getRandamNumber(0, dummyArea);
+				dummy = HIRA_USUAL.substring(n, n+1);
+
+				if(-1 == usedStr.indexOf(dummy)){
+					// 重複しない乱数
+					break;
+				}else{
+// alert("重複:" + dummy + "   " + usedStr +  "   i:" + i + "   k:" + k );
+				}
+			}
+
+			wkArr[i] = dummy;
+		}
+
+		usedStr = usedStr + wkArr[i];
+	}
+
+	// シャッフル (そんなにする必要はないので、パネル数未満で。)
+	var j = 0;
+	for(i = 0; i < 5; i++){
+
+		j = getRandamNumber(0, 5);
+		var tmp = wkArr[i];
+		wkArr[i] = wkArr[j];
+		wkArr[j] = tmp;
+	}
+
+	// 選択肢パネル表示
+	for(i = 0; i < 6; i++){
+
+		var w = i % PANEL_WIDTH;
+		var h = Math.floor(i / PANEL_WIDTH);
+		var cor = h.toString() + w.toString();
+
+		var wk = "window.document.NumInput.B" + cor + ".value='" + wkArr[i] + "'";
+//alert(cor + "   " + wk);
+		eval(wk);
+	}
+
+	//
+	document.getElementById('provlemDisplay').innerHTML = "";
+	document.getElementById('ReportArea').innerHTML = "";
+}
+
+// 回答確認
+function checkAnswer()
+{
+	var ans = document.getElementById('provlemDisplay').innerHTML; // 回答
+
+	// 正解のチェック
+// alert("正解:" + Result + ":回答:" + ans + ":");
+	if(ans == Result){
+
+		var audio = new Audio("Sound/クイズ正解5.mp3");
+		audio.play();
+
+		document.getElementById('ReportArea').innerHTML = "<font color='blue'>○：正解</font>";
+
+	}else{
+		document.getElementById('ReportArea').innerHTML = "<font color='red'>×：不正解</font>　(正解：" + Result + ")";
+		var audio = new Audio("Sound/クイズ不正解1.mp3");
+		audio.play();
+
+	}
+}
+
+// パネルクリック
+function PushChar(cor)
+{
+	var wk = "window.document.NumInput.B" + cor + ".value";
+	var char = eval(wk);
+
+	wk = document.getElementById('provlemDisplay').innerHTML;
+	document.getElementById('provlemDisplay').innerHTML = wk + char;
+}
+
+// カテゴリデータの配列の入れ替え
+function ChangeCatetory()
+{
+	// 配列入れ替え
+	var catName = window.document.NumInput.Category.value;
+	var wk = "CategoryItemsArr = " + window.document.NumInput.Category.value + ";";
+	eval(wk);
+
+	// 変更後のモーラの１シート目に更新
+	CurIndex = 0;
+	DispProblem(0);
+}
+
+function init()
+{
+	CategoryItemsArr=Mora2;
+	DispProblem(0);
+}
+
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white" onLoad="init()">
+<script src="Data/ST音韻抽出配列課題.js"></script>
+<H1 class="ST_COLOR ">音韻抽出配列課題</H1>
+
+<P align="left">
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+モーラ：
+<SELECT NAME="Category" size=1 onChange="return ChangeCatetory();">
+<OPTION value='Mora2' selected>2
+<OPTION value='Mora3'>3
+<OPTION value='Mora4'>4
+</SELECT>
+
+<HR>
+
+<INPUT TYPE="button" NAME="BadckBtn" VALUE="＜前" class="Question" onClick="return DispProblem(-1);">
+<INPUT TYPE="button" NAME="ForwordBtn" VALUE="次＞" class="Question" onClick="return DispProblem(1);">
+
+
+<TABLE border=0>
+  <TR>
+    <TD colspan="3">
+	<img id="ImageDisplay" width="400" src="Image/音韻抽出配列課題/空白.PNG">
+    </TD>
+  </TR>
+
+  <TR>
+    <TD  colspan="3" align="center">
+	<INPUT TYPE="button" NAME="B00" VALUE="00" CLASS="Tile" onClick="PushChar('00')"> 
+	<INPUT TYPE="button" NAME="B01" VALUE="01" CLASS="Tile" onClick="PushChar('01')"> 
+	<INPUT TYPE="button" NAME="B02" VALUE="02" CLASS="Tile" onClick="PushChar('02')">
+ 	<br>
+ 	<br>
+	<INPUT TYPE="button" NAME="B10" VALUE="10" CLASS="Tile" onClick="PushChar('10')"> 
+	<INPUT TYPE="button" NAME="B11" VALUE="11" CLASS="Tile" onClick="PushChar('11')"> 
+	<INPUT TYPE="button" NAME="B12" VALUE="12" CLASS="Tile" onClick="PushChar('12')"> 
+    </TD>
+  </TR>
+
+</TABLE>
+
+<hr>
+
+
+<TABLE border=0>
+  <TR>
+    <TD width=340 height=40 align="center">
+      <font size=5>
+       <P id="provlemDisplay"></P>
+      </font>
+    </TD>
+
+    <TD align="right">
+      <INPUT TYPE="button" NAME="ClearEdit" VALUE="クリア" class="Clear" onClick="document.getElementById('provlemDisplay').innerHTML=''"> 					  
+    </TD>
+  </TR>
+</TABLE>
+
+<TABLE border=0>
+  <TR>
+    <TD>
+      <INPUT width=100 TYPE="button" VALUE="回答" class="CheckTest" onClick="return checkAnswer();">
+    </TD>
+
+    <TD>	
+      <P id="ReportArea"></P>
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

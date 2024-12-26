@@ -1,0 +1,310 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=Shift_JIS">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+
+input , text, textarea {
+	font-size:130%
+}
+
+.NumText {
+	text-align:right;
+}
+
+
+.Question {
+	text-align:center;
+	font-size:24px;
+}
+
+.ContText {
+	text-align:right;
+}
+
+.TouchDot{
+	text-align:center;
+	font-size:32px;
+	border:0;
+	background:white;
+	width:20;
+	height:20;
+	// color:white;
+}
+
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+var OK_Count = 0;
+var NG_Count = 0;
+
+
+var COLOR_ON = "red";
+var COLOR_OFF = "white";
+
+
+var TimerConuter = 0;
+
+//var XPos = 0;
+//var YPos = 0;
+
+var Length = 6;
+
+
+
+// 問題の要素
+//var QuestionArr = new Array();
+//var PrevAnswer="";
+
+var TimeID = 0;
+
+var Timer = function()
+{
+	var t = window.document.NumInput.TIME_NOW.value;
+	t++;
+	window.document.NumInput.TIME_NOW.value = t;
+
+	if(TimerConuter == window.document.NumInput.TIME.value){
+		alert("終了！！");
+		TimerConuter = 0;
+
+		// タイマーがとまらない？？
+		clearTimeout(TimeID);
+//alert("clear!!");
+		ClearAll();
+//alert("clear!!222");
+		return
+	}else{
+		TimerConuter++;
+		TimeID = setTimeout(Timer, 1000);
+	//	alert(TimeID);
+	}
+};
+
+
+// 前(x, y) 以外のボタンを選ぶ
+function newButton(x, y){
+	
+// alert("newButton");
+
+	v = 100 * Math.random();
+	v = Math.floor(v);
+	var newX = v % Length;
+
+
+	v = 100 * Math.random();
+	v = Math.floor(v);
+	var newY = v % Length;
+
+
+
+
+//alert(x + " " + y + " " + newX + " " + newY  );
+
+	var pushdeB = "B" + newX + newY;	// 新しいボタン
+	var evString = "window.document.NumInput." +   pushdeB  + ".value";
+
+
+	// 赤
+	var thisButton = "window.document.NumInput." +   pushdeB  + ".style.backgroundColor = '" + COLOR_ON + "';";
+	eval(thisButton);
+}
+
+
+function push(x, y){
+
+	var pushdeB = "B" + x + y;	// 押されたボタン
+	var evString = "window.document.NumInput." +   pushdeB  + ".style.backgroundColor"; // 押されたボタンの色
+
+//  alert(evString);
+//  alert(	eval(evString)  );
+
+	var state = eval(evString);
+
+	if(COLOR_ON  == state){
+		// ON ボタン
+		OK_Count++;
+
+		// OFF にする
+		eval( evString + "='" + COLOR_OFF + "'");
+
+		// 新しいボタン
+		newButton(x, y);
+
+		// 消す
+		var thisButton = "window.document.NumInput." +   pushdeB  + ".style.backgroundColor = '" + COLOR_OFF + "';";
+
+		eval(thisButton);
+	}else{
+		// 押されていないボタン
+		NG_Count++;
+	}
+	
+	window.document.NumInput.OK_COUNT.value = OK_Count;
+	window.document.NumInput.NG_COUNT.value = NG_Count;
+};
+
+
+function StartB(){
+// alert("StartB");
+
+	ClearAll();
+
+	newButton(1, 1); // 一つ目をＯＮにする
+
+	Timer();
+};
+
+function ClearAll()
+{
+//alert("ClearAll");
+	window.document.NumInput.TIME_NOW.value = 0;
+	window.document.NumInput.OK_COUNT.value = 0;
+	window.document.NumInput.NG_COUNT.value = 0;
+	TimerConuter = 0;
+
+
+	var x = 0;
+	var y = 0;
+
+	for(x = 0; x < Length; x++){
+		for(y = 0; y < Length; y++){
+
+			var curButton = "window.document.NumInput.B" + x + y;
+		
+		//	eval(curButton + ".value=" + "'○';");
+			eval(curButton + ".style.backgroundColor = '" + COLOR_OFF + "'");
+
+
+		}
+	}
+
+}
+
+
+function Test()
+{
+	var x = window.document.NumInput.X.value;
+	var y = window.document.NumInput.Y.value;
+
+	var curButton = "window.document.NumInput.B" + x + y;
+		
+	eval(curButton + ".style.backgroundColor = '" + "blue" + "'");
+
+	return false;
+}
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY>
+<H1 class="OT_COLOR ">ロータッチ</H1>
+
+
+<P align="left">
+
+
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+
+
+秒数(秒)：<INPUT TYPE="number" NAME="TIME" VALUE="60" MIN="1" size=2 class="ContText">
+
+<br>
+
+経過：<INPUT TYPE="text" NAME="TIME_NOW" VALUE="0" size=3 class="ContText">
+　　
+OK：<INPUT TYPE="text" NAME="OK_COUNT" VALUE="0" size=3 class="ContText">
+NG：<INPUT TYPE="text" NAME="NG_COUNT" VALUE="0" size=3 class="ContText">
+
+
+
+<br>
+<br>
+
+<INPUT TYPE="button" name="START" VALUE="スタート" onClick="return StartB();">
+
+
+<TABLE bgcolor="white" border=0 cellspacing=30>
+	<TR>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B00" VALUE="" onClick="return push(0,0);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B01" VALUE="" onClick="return push(0,1);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B02" VALUE="" onClick="return push(0,2);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B03" VALUE="" onClick="return push(0,3);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B04" VALUE="" onClick="return push(0,4);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B05" VALUE="" onClick="return push(0,5);"></TD>
+	</TR>
+
+	<TR>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B10" VALUE="" onClick="return push(1,0);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B11" VALUE="" onClick="return push(1,1);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B12" VALUE="" onClick="return push(1,2);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B13" VALUE="" onClick="return push(1,3);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B14" VALUE="" onClick="return push(1,4);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B15" VALUE="" onClick="return push(1,5);"></TD>
+	</TR>
+
+	<TR>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B20" VALUE="" onClick="return push(2,0);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B21" VALUE="" onClick="return push(2,1);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B22" VALUE="" onClick="return push(2,2);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B23" VALUE="" onClick="return push(2,3);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B24" VALUE="" onClick="return push(2,4);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B25" VALUE="" onClick="return push(2,5);"></TD>
+	</TR>
+
+	<TR>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B30" VALUE="" onClick="return push(3,0);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B31" VALUE="" onClick="return push(3,1);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B32" VALUE="" onClick="return push(3,2);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B33" VALUE="" onClick="return push(3,3);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B34" VALUE="" onClick="return push(3,4);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B35" VALUE="" onClick="return push(3,5);"></TD>
+	</TR>
+
+	<TR>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B40" VALUE="" onClick="return push(4,0);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B41" VALUE="" onClick="return push(4,1);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B42" VALUE="" onClick="return push(4,2);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B43" VALUE="" onClick="return push(4,3);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B44" VALUE="" onClick="return push(4,4);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B45" VALUE="" onClick="return push(4,5);"></TD>
+	</TR>
+
+	<TR>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B50" VALUE="" onClick="return push(5,0);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B51" VALUE="" onClick="return push(5,1);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B52" VALUE="" onClick="return push(5,2);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B53" VALUE="" onClick="return push(5,3);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B54" VALUE="" onClick="return push(5,4);"></TD>
+		<TD><INPUT TYPE="button" class="TouchDot" NAME="B55" VALUE="" onClick="return push(5,5);"></TD>
+	</TR>
+
+
+
+</TABLE>
+
+
+
+
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

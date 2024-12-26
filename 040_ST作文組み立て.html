@@ -1,0 +1,328 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+ST作文組み立て
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+var ItemCount = 0;
+
+// セパレータ(各問題を選択肢に分離)
+var SEPARATOR = "/";
+
+// 選択肢の上限
+var ITEM_AREA_LIMMIT = 10;
+
+// ページカウンター
+var PageCounter = 0;
+
+// 問題の要素
+var QuestionArr = new Array();
+var AnswerID = 0;
+
+// 問題の配列                         
+QuestionArr = new Array();
+
+// 選択肢ボタンが押された順番のID
+PushTraceArr = new Array();
+
+// 表示した選択肢一覧
+var PrevAnswer="";
+
+
+function RandNum(v, bound)
+{
+	var r = 100 * Math.random();
+	r = Math.floor(v);
+
+	var ret = r % bound;
+
+	if(v == ret){
+		ret = v + 1;
+
+		if(ret >= bound){
+			ret = ret - 2;
+		}
+	}
+
+// alert("変更" + v + "→" + ret + "   " + bound);
+
+	return ret;
+}
+
+
+// 選択肢順の並び替え。動的に順番を変更する
+function ChangeOrder()
+{
+	var i = 0;
+
+	// まずは、正解順の準備
+	for(i=0; i < QuestionArr.length; i++){
+		SetOrgNum(i,i); 
+	}
+
+	var tmp = 0;
+
+	for(i=0; i < QuestionArr.length; i++){
+
+		var r = RandNum(i, QuestionArr.length)
+
+		var tmp = GetOrgNum(i);
+		SetOrgNum(i, GetOrgNum(r));
+		SetOrgNum(r, tmp);
+	}
+}
+
+function SetOrgNum(n, v)
+{
+	var buff = "window.document.NumInput.RealV" + n +  ".value=" + v;
+	eval(buff);	
+}
+
+function GetOrgNum(n)
+{
+	var buff = "window.document.NumInput.RealV" + n +  ".value"
+	return eval(buff); 
+}
+
+// n 番目の選択肢ボタンのラベル
+function GetDispLabel(n)
+{
+	var wk = "window.document.NumInput.Q" + n + ".value";
+	return eval(wk);
+}
+
+
+
+// 問題選択肢の一覧表示
+function PrepareteQuestion(index)
+{
+	// 開始 (1頁目)
+	window.document.NumInput.PageCount.value = index + 1;
+
+	// 選択肢に分離 
+	QuestionArr = Items[index].split(SEPARATOR); // この段階では正解順に格納した状態!!
+
+	// 選択肢の表示順を変更する
+	ChangeOrder();
+
+       	// レポート欄クリア
+	window.document.NumInput.InputData.value = "";
+
+	var i = 0;
+	var stateD = false; // 入力ボタンの制御 (disabled)
+
+	for(i = 0; i < ITEM_AREA_LIMMIT; i++){
+
+		var tmp = "";
+
+		var I = GetOrgNum(i); // 表示する選択肢の番号
+
+		if(i < QuestionArr.length){
+			// 選択肢あり
+			tmp = "window.document.NumInput.Q" + i + ".value=" + "\"" + QuestionArr[I] + "\"";
+		}else{
+			stateD = true; // ここからは制御なしにしする
+			tmp = "window.document.NumInput.Q" + i + ".value=" + "\"\"";
+		}
+		// 選択肢表示
+		eval(tmp);
+
+		// 制御
+		tmp = "window.document.NumInput.Q" + i + ".disabled=" + stateD;
+		eval(tmp);
+	}
+
+	// 回答のカウント
+	AnswerID = 0;
+}
+
+// 押されたボタン
+function Answer(index)
+{
+	// 置換後のラベルを反映するので GetOrgNum(index) による変換をする。
+	var wk = "window.document.NumInput.Q" + index + ".value";
+	var data = eval(wk); // 押されたボタンのラベル
+
+	// ボタンの選択肢を転記 (選択肢を文字列に追加)
+	var buff = window.document.NumInput.InputData.value;
+	window.document.NumInput.InputData.value = buff + "  " + data;
+
+	// 入力した回答の配列
+//alert(data);
+
+	// 押された選択肢ボタンのID
+	PushTraceArr[AnswerID] = index;
+
+	// 押した選択肢ラベルの数のカウント
+	++AnswerID;
+
+	// 使用済みなったボタンは、disabled にする
+	wk = "window.document.NumInput.Q" + index + ".disabled=true";
+	eval(wk);
+}
+
+// やり直し
+function ClearEdit()
+{
+	var i = 0;
+
+	// 選択肢ボタンの有効化
+	for(i = 0; i < QuestionArr.length; i++){
+		var tmp = "window.document.NumInput.Q" + i + ".disabled=false";
+		eval(tmp);
+	}
+
+	window.document.NumInput.InputData.value ="";
+
+	// 回答のカウント
+	AnswerID = 0;
+}
+
+// 結果確認
+function CheckAnswer()
+{
+	var i = 0;
+	var buff = ""; // 判定結果文字列
+
+	var resultStr = "<font color='blue' size=+3><b>○</b></font>　";
+
+
+	for(i = 0; i < AnswerID; i++){
+
+ //     alert("ans:" + AnswerArr[i] + " Q:" + QuestionArr[i]);                 
+
+// alert("i:" + i + "  変換後:" + GetOrgNum(i));
+
+
+
+		if(QuestionArr[i] == QuestionArr[GetOrgNum(PushTraceArr[i])]){
+			// 正しい
+			buff = buff +  QuestionArr[i] + " ";
+		}else{
+			buff = buff + "<font color='red'>" + QuestionArr[i] + "</font> ";
+			resultStr = "<font color='red' size=+3><b>×</b></font>　";
+
+		}
+
+
+	}
+	buff = resultStr + buff;
+	document.getElementById('ReportArea').innerHTML = buff;
+
+}
+
+// ページ変更
+function PageChange(mv)
+{
+	PageCounter = PageCounter + mv;
+
+	if(PageCounter >= Items.length){
+		// ページを超えたら最初に
+		PageCounter = 0;
+	}else if(PageCounter < 0){
+		// 後ろ方向なら先頭に
+		PageCounter = Items.length - 1;
+	}
+	// 問題更新
+	PrepareteQuestion(PageCounter);
+
+	// 解答欄クリア
+	document.getElementById('ReportArea').innerHTML = "";
+}
+
+function ReStart()
+{
+alert("再開");
+//	PageCount = 0;
+	PageChange(0);
+
+
+
+}
+
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white" onload="return PageChange(0);">
+<script src="Data/ST作文組み立て.js"></script>
+<H1 class="ST_COLOR ">作文組み立て</H1>
+
+
+<P align="left">
+
+
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+<!--
+<INPUT TYPE="button" NAME="provlemBtn" VALUE="スタート" onClick="return PageChange(0);">
+<br>
+-->
+
+問題番号：
+<INPUT TYPE="text" NAME="PageCount" VALUE="1" size="3" class="NumText">
+<INPUT TYPE="button" NAME="PrevPage" VALUE="＜" class="Question" onClick="return PageChange(-1);">
+<INPUT TYPE="button" NAME="NextPage" VALUE="＞" class="Question" onClick="return PageChange(1);">
+
+
+
+<HR>
+問題：
+
+
+<P align="left">
+１．<INPUT TYPE="button" NAME="Q0" VALUE="" onClick="return Answer('0');">
+２．<INPUT TYPE="button" NAME="Q1" VALUE="" onClick="return Answer('1');">
+３．<INPUT TYPE="button" NAME="Q2" VALUE="" onClick="return Answer('2');">
+４．<INPUT TYPE="button" NAME="Q3" VALUE="" onClick="return Answer('3');">
+５．<INPUT TYPE="button" NAME="Q4" VALUE="" onClick="return Answer('4');">
+６．<INPUT TYPE="button" NAME="Q5" VALUE="" onClick="return Answer('5');">
+７．<INPUT TYPE="button" NAME="Q6" VALUE="" onClick="return Answer('6');">
+８．<INPUT TYPE="button" NAME="Q7" VALUE="" onClick="return Answer('7');">
+９．<INPUT TYPE="button" NAME="Q8" VALUE="" onClick="return Answer('8');">
+１０．<INPUT TYPE="button" NAME="Q9" VALUE="" onClick="return Answer('9');">
+
+<INPUT TYPE="hidden" NAME="RealV0">
+<INPUT TYPE="hidden" NAME="RealV1">
+<INPUT TYPE="hidden" NAME="RealV2">
+<INPUT TYPE="hidden" NAME="RealV3">
+<INPUT TYPE="hidden" NAME="RealV4">
+<INPUT TYPE="hidden" NAME="RealV5">
+<INPUT TYPE="hidden" NAME="RealV6">
+<INPUT TYPE="hidden" NAME="RealV7">
+<INPUT TYPE="hidden" NAME="RealV8">
+<INPUT TYPE="hidden" NAME="RealV9">
+<br>
+</p>
+回答：
+
+	<TEXTAREA name="InputData"  rows="4" cols="64"></TEXTAREA><br>
+	<INPUT TYPE="button" NAME="Clear" VALUE="やり直し" class="Clear" onClick="return ClearEdit();"><br>
+<br>
+<hr>
+	<INPUT TYPE="button" VALUE="正解" class="CheckTest" onClick="return CheckAnswer();"><br>
+
+
+<P id="ReportArea"></P>
+
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,360 @@
+﻿<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<LINK REL="stylesheet" TYPE="text/css" HREF="style.css">
+<TITLE>
+ST暗記用語フラッシュ
+</TITLE>
+<STYLE TYPE="text/css">
+<!--
+a { text-decoration:none; }
+
+A:hover { font-weight:bolder}
+-->
+
+</STYLE>
+
+<Script language="JavaScript">
+<!--
+var ItemCount = 0;
+
+// セパレータは半角空白
+var SEPARATOR = " ";
+
+// 問題の要素
+var QuestionArr = new Array();
+
+// 問題の配列                         
+QuestionArr = new Array();
+
+// 表示した選択肢一覧
+var PrevAnswer="";
+
+var Scenario0 = new Array(); 
+var Scenario1 = new Array(); 
+var Scenario2 = new Array(); 
+var Scenario3 = new Array(); 
+var Scenario4 = new Array(); 
+
+// 問題のシナリオ
+var ScenarioCounter = new Array(0, 0, 0, 0, 0);
+var AllScenario = new Array(Scenario0, Scenario1, Scenario2, Scenario3, Scenario4);
+
+
+// 色
+var ColorArr = new Array('black', 'red', 'blue', 'green', 'orange');
+//
+//var FigArr = new Array('○', '△', '□', '☆', '◇');
+
+// 文字でも区別するつもりだったが、逆に混乱するといけないので、やめる。
+var FigArr = new Array('', '', '', '', '');
+
+
+// 乱数
+function RandNum(keta)
+{
+	 
+	var r = Math.random() * Math.pow(10, keta);
+
+
+
+	r = Math.floor(r);
+
+alert(r);
+
+	return r;
+}
+
+// 問題のシナリオ
+function CreateScenario()
+{
+//alert("CreateScenario");
+	var pCount = window.document.NumInput.P_COUNT.value; // 各計算の問題回数
+	var pKETA = window.document.NumInput.P_KETA.value; // 各問題桁数
+	var pTypeCount = window.document.NumInput.P_PAT.value; // 問題の種類の回数
+
+	var isMinus = false;
+
+	// 各問題の数値候補の範囲
+	var bound = Math.pow(10, pKETA) - 1; 
+
+	var i = 0;
+
+	// 
+	for(i = 0; i < AllScenario.length; i++){
+		ScenarioCounter[i] = 0;
+	}
+
+	// 問題作成
+	var c = 0;	// 各計算の回数
+	var p = 0;	// 問題の種類数
+
+	for(p = 0; p < pTypeCount; p++){
+		// 各パターン
+		for(c = 0; c < pCount; c++){
+			// 各問題の回数
+			var prob = Math.floor(Math.random() * Math.pow(10, pKETA));
+			AllScenario[p][c] = prob;
+
+		}
+//alert(AllScenario[p]);
+	}
+	
+	
+
+
+//alert(ScenarioCounter);
+}
+
+
+// 問題の表示
+function DispValues(){
+
+	var timer1 = null;
+
+	var pCount = window.document.NumInput.P_COUNT.value; // 各計算の問題回数
+	var pTypeCount = window.document.NumInput.P_PAT.value; // 問題の種類の回数
+
+
+	// 問題作成
+	var c = 0;	// 各計算の回数
+	var p = 0;	// 問題の種類数
+
+	// 描画の回数
+	var len = pCount * pTypeCount;
+
+	// 回数のカウンター
+	var index = 0;
+
+	// ズーム
+	var div = document.getElementById('provlemDisplay');
+	div.style.fontSize = window.document.NumInput.ZOOM.value;
+
+	document.getElementById('provlemDisplay').innerHTML = "出題！"; 
+
+
+	function event(){
+
+//// AllScenario[p][c]
+
+		if(index < len){
+			// 選択肢の表示
+			
+			c = Math.floor(index / pTypeCount);
+			p = index % pTypeCount;
+
+			document.getElementById('provlemDisplay').innerHTML  
+				=　FigArr[p] + "　　<font color='" + ColorArr[p]  + "'>" + AllScenario[p][c] + "</font>";
+
+		}else{
+			document.getElementById('provlemDisplay').innerHTML  = "";
+			clearInterval(timer1);
+		//	window.document.NumInput.answerBtn.disabled = false;
+		}
+		++index;
+	}
+
+	timer1 = setInterval(event, 1000*window.document.NumInput.DisplayTime.value);
+}
+
+// 問題表示
+// 問題を、配列で準備する。
+function CreateQuestion()
+{
+	CreateScenario();
+	
+	// 表示
+	DispValues();
+
+	// 問題欄制御
+//	window.document.NumInput.provlemBtn.disabled = true;
+	window.document.NumInput.Answer.disabled = false;
+	
+}
+
+
+
+
+function DispAnswer()
+{
+
+	var pCount = window.document.NumInput.P_COUNT.value; // 各計算の問題回数
+	var pTypeCount = window.document.NumInput.P_PAT.value; // 問題の種類の回数
+
+//alert(pCount);
+
+	var p = 0;	// 問題の種類数
+	var c = 0;	// 各計算の回数
+
+
+	// 回数のカウンター
+	var index = 0;
+
+	var buff = "";
+
+	for(p = 0; p < pTypeCount; p++){
+		var result = 0;
+
+		var plus = "";
+
+		//// var fontColor = "<font color='" + ColorArr[p]  + "'>"
+		buff = buff + "<font color='" + ColorArr[p]  + "'>";
+
+		for(c = 0; c < pCount; c ++){ 
+
+			result = result + AllScenario[p][c];	// 回答の計算
+
+		//	buff = buff + '　' + AllScenario[p][c];
+
+			if(0 <= AllScenario[p][c]){
+
+				buff = buff + plus + AllScenario[p][c];
+				plus = '+';
+			}else{
+				buff = buff + AllScenario[p][c];
+			}
+
+
+		}
+
+	//	buff = buff + AllScenario[p][c] + '　';
+		buff = buff + '　=　' + result + '</font><br>';
+
+
+	}
+
+
+	document.getElementById('provlemDisplay').innerHTML = buff;
+
+	//AllScenario[p][c]
+
+
+	// 問題欄制御(入力許可)
+	window.document.NumInput.provlemBtn.disabled = false;
+	window.document.NumInput.Answer.disabled = true;
+}
+
+// ズーム
+function ZoomChange(diff)
+{
+
+	var wk = Number(window.document.NumInput.ZOOM.value);
+	wk = wk + diff;
+
+	if(wk < 0){
+		return;
+	}
+	window.document.NumInput.ZOOM.value = wk;	
+
+}
+
+function PatColor()
+{
+//alert("DispPattern");
+	var sel = window.document.NumInput.P_PAT.value;
+
+	var buff = "";
+
+	var i = 0;
+	for(i = 0; i < ColorArr.length; i++){
+
+		if(i < sel){
+			buff = buff + "<font color='" + ColorArr[i] + "'>●</font>";
+		}else{
+			buff = buff + "<font color='white'>●</font>";
+		}
+
+	}
+
+
+
+	document.getElementById('DispPattern').innerHTML = buff;
+
+}
+
+
+//-->
+</Script>
+</HEAD>
+
+<BODY  bgcolor="white">
+<H1 class="ST_COLOR ">フラッシュ暗算</H1>
+
+<script src="data/STフラッシュ暗記訓練.js"></script>
+
+
+<P align="left">
+
+
+
+<FORM METHOD="post" NAME="NumInput" ACTION="">
+
+
+桁数：<INPUT TYPE="number" NAME="P_KETA" VALUE=2 size=3 class="TextRight">
+　　<!-- ←余白用に全角空白あり！ -->
+
+計算回数：<INPUT TYPE="number" NAME="P_COUNT" VALUE=2 size=2 class="TextRight">
+
+　　<!-- ←余白用に全角空白あり！ -->
+表示秒数：
+<INPUT TYPE="number" NAME="DisplayTime" VALUE="1.5" SKIP="0.1" MIN="0.1" size=5 class="NumText">
+
+<br>
+
+パターン数：
+<SELECT NAME="P_PAT" size=1 onchange="return PatColor()">
+
+<OPTION value=1 selected>1
+<OPTION value=2>2
+<OPTION value=3>3
+<OPTION value=4>4
+<OPTION value=5>5
+</SELECT>
+<div id="DispPattern">
+●
+</div>
+
+<P align="right">
+ズーム：<INPUT TYPE="number" NAME="ZOOM" VALUE=100 size=5 class="TextRight">
+<INPUT TYPE="button" NAME="ZoomOut" VALUE="－" class="Question" onClick="return ZoomChange(-10);">
+<INPUT TYPE="button" NAME="ZoomIn" VALUE="＋" class="Question" onClick="return ZoomChange(10);">
+</P>
+
+<HR>
+
+<INPUT TYPE="button" NAME="provlemBtn" VALUE="出題" class="Question" onClick="return CreateQuestion();">
+
+<INPUT TYPE="button" NAME="Replay" VALUE="再表示" class="Question" onClick="return DispValues();">
+
+　<!-- ←余白用に全角空白あり！ -->
+<INPUT TYPE="button" NAME="Answer" VALUE="回答" class="CheckTest" disabled onClick="return DispAnswer();">
+
+
+
+
+<!-- ランダム文字列表示 -->
+<TABLE align="center">
+  <TR>
+    <TD>
+      <font size=+5>
+        <P id="provlemDisplay"></P>
+      </font>
+    </TD>
+  </TR>
+</TABLE>
+
+
+<TABLE align="left">
+<TR>
+<TD>
+<P id="ReportArea"></P>
+</TD>
+</TR>
+</TABLE>
+
+</FORM>
+
+</P>
+
+</BODY>
+</HTML>
